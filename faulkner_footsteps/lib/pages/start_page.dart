@@ -72,7 +72,7 @@ class _StartPageState extends State<StartPage>
       print("AUTH READY at: ${DateTime.now()}  user: ${user?.uid}");
     });
 
-    User? user = FirebaseAuth.instance.currentUser;
+    final user = await FirebaseAuth.instance.currentUser;
     if (user != null) {
       print("already signed in");
     } else {
