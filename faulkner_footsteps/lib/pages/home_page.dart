@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
     final LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
     );
-    if (permission == LocationPermission.always){
+    if (permission == LocationPermission.whileInUse || permission == LocationPermission.always){
        Position position =
         await Geolocator.getCurrentPosition(locationSettings: locationSettings);
      lat = position.latitude;
