@@ -146,11 +146,9 @@ class _MapDisplay2State extends State<MapDisplay2> {
         nearBySites.where((entry) => !appState.hasVisited(entry.key)).toList();
 
     // If no new sites, return
-         Geolocator.checkPermission().then((permission) {
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
+      if (widget.currentPosition == LatLng(35.0918, -92.4367)) {
       return;
-    }});
+      };
     if (newSites.isEmpty) {
       return;
     }
