@@ -3,6 +3,7 @@ import 'package:faulkner_footsteps/dialogs/pin_Dialog.dart';
 import 'package:faulkner_footsteps/pages/hist_site_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:faulkner_footsteps/objects/hist_site.dart';
@@ -145,6 +146,11 @@ class _MapDisplay2State extends State<MapDisplay2> {
         nearBySites.where((entry) => !appState.hasVisited(entry.key)).toList();
 
     // If no new sites, return
+         Geolocator.checkPermission().then((permission) {
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+      return;
+    }});
     if (newSites.isEmpty) {
       return;
     }
