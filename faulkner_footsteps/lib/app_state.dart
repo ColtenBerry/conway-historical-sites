@@ -111,16 +111,34 @@ class ApplicationState extends ChangeNotifier {
             .snapshots()
             .listen((snapshot) {
           _progressAchievements = [];
+          final siteNames = _historicalSites.map((s) => s.name).toSet();
           for (final document in snapshot.docs) {
             final title = document.get('title') as String;
             final description = document.get('description') as String;
             final requiredSites =
                 List<String>.from(document.get('requiredSites') as List);
 
+            // validate sites. check if site is in historical sites list.
+            for (final site in requiredSites) {
+              if (!siteNames.contains(site)) {
+                // Debug: log invalid sites
+                print("🚨 INVALID SITE IN ACHIEVEMENT!");
+                print("   Achievement: $title");
+                print("   Invalid site: $site");
+                print("   Valid sites are: $siteNames");
+
+                // TODO: remove site here
+                // I would add it in right now, but I am not sure if it is good practice to have just any user in app state
+                // edit the firestore. Let me think about that
+              }
+            }
+
+            // Filter out invalid sites
+            final validSites = requiredSites.where(siteNames.contains).toList();
             _progressAchievements.add(ProgressAchievement(
               title: title,
               description: description,
-              requiredSites: requiredSites,
+              requiredSites: validSites,
             ));
           }
           notifyListeners();
@@ -414,39 +432,6 @@ class ApplicationState extends ChangeNotifier {
       }
     } catch (e) {
       print("Error loading filters: $e");
-    }
-
-    // Load progress achievements after filters are loaded
-    await loadProgressAchievements();
-  }
-
-  Future<void> loadProgressAchievements() async {
-    if (!_loggedIn) return;
-
-    try {
-      _progressAchievements.clear();
-
-      final snapshot = await FirebaseFirestore.instance
-          .collection('progress_achievements')
-          .get();
-
-      for (final document in snapshot.docs) {
-        final title = document.get('title') as String;
-        final description = document.get('description') as String;
-        final requiredSites =
-            List<String>.from(document.get('requiredSites') as List);
-
-        _progressAchievements.add(ProgressAchievement(
-          title: title,
-          description: description,
-          requiredSites: requiredSites,
-        ));
-      }
-
-      notifyListeners();
-      print('Loaded ${_progressAchievements.length} progress achievements');
-    } catch (e) {
-      print('Error loading progress achievements: $e');
     }
   }
 
