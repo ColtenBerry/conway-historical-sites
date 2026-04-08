@@ -151,7 +151,6 @@ class _ReorderableItemListDialogState<T> extends State<ListEdit<T>> {
                     },
                   ),
           ),
-          Expanded(child:
           Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -205,13 +204,14 @@ class _ReorderableItemListDialogState<T> extends State<ListEdit<T>> {
                     ),
                   ),
                 ],
-              ]),
-          ),
+              ],
+              ),
         ],
       ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actionsAlignment: MainAxisAlignment.start,
       actions: [
-        Expanded(child: 
+        Row( children: [
+        Expanded(child:
         TextButton(
           onPressed: () {
             widget.items.clear();
@@ -222,7 +222,7 @@ class _ReorderableItemListDialogState<T> extends State<ListEdit<T>> {
         ),
         ),
         //const SizedBox(width: 8),
-        Expanded(child: 
+        Expanded(child:
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromARGB(255, 218, 186, 130),
@@ -238,6 +238,8 @@ class _ReorderableItemListDialogState<T> extends State<ListEdit<T>> {
           },
           child: const Text("Submit"),
         ),
+        ),
+        ]
         ),
       ],
     );

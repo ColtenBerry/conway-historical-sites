@@ -25,29 +25,38 @@ class _HomePageState extends State<HomePage> {
 
   void getlocation() async {
     bool serviceEnabled;
+    double lat = 35.0918;
+    double long = -92.4367;
     LocationPermission permission;
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+      return setState(() {
+      _currentPosition = LatLng(lat, long);
+    });
     }
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
+       return setState(() {
+      _currentPosition = LatLng(lat, long);
+    });
       }
     }
     if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+      return setState(() {
+      _currentPosition = LatLng(lat, long);
+    });
     }
     final LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
     );
-    Position position =
+    if (permission == LocationPermission.whileInUse || permission == LocationPermission.always){
+       Position position =
         await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-    double lat = position.latitude;
-    double long = position.longitude;
+     lat = position.latitude;
+     long = position.longitude;
+    }
     setState(() {
       _currentPosition = LatLng(lat, long);
     });
