@@ -134,6 +134,8 @@ class ApplicationState extends ChangeNotifier {
 
             // Filter out invalid sites
             final validSites = requiredSites.where(siteNames.contains).toList();
+            validSites.toSet();
+            validSites.toList();
             _progressAchievements.add(ProgressAchievement(
               title: title,
               description: description,
