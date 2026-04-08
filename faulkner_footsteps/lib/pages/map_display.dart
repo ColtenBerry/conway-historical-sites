@@ -39,7 +39,7 @@ class _MapDisplay2State extends State<MapDisplay2> {
   }
 
   void _initializeMap() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 20));
     final target = widget.centerPosition ?? widget.currentPosition;
     final zoom = widget.centerPosition != null ? 20.0 : 14.0;
     _mapController.move(target, zoom);
