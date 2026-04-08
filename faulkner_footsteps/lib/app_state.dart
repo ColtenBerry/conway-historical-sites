@@ -125,7 +125,6 @@ class ApplicationState extends ChangeNotifier {
                 print("🚨 INVALID SITE IN ACHIEVEMENT!");
                 print("   Achievement: $title");
                 print("   Invalid site: $site");
-                print("   Valid sites are: $siteNames");
 
                 // TODO: remove site here
                 // I would add it in right now, but I am not sure if it is good practice to have just any user in app state
