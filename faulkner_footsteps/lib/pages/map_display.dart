@@ -141,9 +141,8 @@ class _MapDisplay2State extends State<MapDisplay2> {
     nearBySites.sort((a, b) => a.value.compareTo(b.value));
 
     // Filter out already visited sites
-    final newSites = nearBySites
-        .where((entry) => !appState.hasVisited(entry.key))
-        .toList();
+    final newSites =
+        nearBySites.where((entry) => !appState.hasVisited(entry.key)).toList();
 
     // If no new sites, return
     if (newSites.isEmpty) {
