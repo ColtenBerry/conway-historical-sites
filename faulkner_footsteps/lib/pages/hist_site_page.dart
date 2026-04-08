@@ -157,6 +157,7 @@ class _HistSitePage extends State<HistSitePage> {
                                               centerPosition: LatLng(
                                                   widget.histSite.lat,
                                                   widget.histSite.lng),
+                                                  
                                             ),
                                           )),
                                 );

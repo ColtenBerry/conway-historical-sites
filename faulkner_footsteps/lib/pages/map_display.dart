@@ -355,7 +355,7 @@ class _MapDisplay2State extends State<MapDisplay2> {
           initialCenter: widget.centerPosition == null
               ? widget.currentPosition
               : widget.centerPosition!,
-          initialZoom: 14.0,
+          initialZoom: 12.0,
         ),
         children: [
           TileLayer(
