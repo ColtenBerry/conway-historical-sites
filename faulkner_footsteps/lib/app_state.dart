@@ -97,7 +97,7 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
 
     // Listen to auth state changes to update the app state accordingly
-    FirebaseAuth.instance.userChanges().listen((user) async {
+    FirebaseAuth.instance.authStateChanges().listen((user) async {
       print("🔵 Auth state changed at ${DateTime.now()}  user: ${user?.uid}");
       if (user != null) {
         _loggedIn = true;
@@ -154,6 +154,10 @@ class ApplicationState extends ChangeNotifier {
       }
     });
     notifyListeners();
+
+    FirebaseAuth.instance.userChanges().listen((user) async {
+      print("User State Changed!");
+    });
   }
 
   Future<List<String>> convertPathsToUrls(List<String> paths) async {
