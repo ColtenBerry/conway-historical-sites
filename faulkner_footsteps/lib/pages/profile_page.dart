@@ -1,5 +1,5 @@
 import 'package:faulkner_footsteps/app_router.dart';
- import 'package:faulkner_footsteps/objects/theme_data.dart';
+import 'package:faulkner_footsteps/objects/theme_data.dart';
 import 'package:faulkner_footsteps/pages/admin_page.dart';
 import 'package:faulkner_footsteps/pages/login_page.dart';
 import 'package:faulkner_footsteps/widgets/achievement_item.dart';
@@ -305,9 +305,10 @@ class _ProfilePageState extends State<ProfilePage>
                                           .colorScheme
                                           .onPrimary)),
                           const SizedBox(height: 16),
-                          Consumer<ApplicationState>(
-                            builder: (context, appState, _) {
-                              if (appState.visitedPlaces.isEmpty) {
+                          Selector<ApplicationState, Set<String>>(
+                            selector: (_, appState) => appState.visitedPlaces,
+                            builder: (context, visitedSites, _) {
+                              if (visitedSites.isEmpty) {
                                 return Text(
                                   'You haven\'t visited any historical sites yet.',
                                   style: Theme.of(context)
@@ -320,44 +321,37 @@ class _ProfilePageState extends State<ProfilePage>
                                       ),
                                 );
                               }
-
-                              return Selector<ApplicationState, Set<String>>(
-                                selector: (_, appState) =>
-                                    appState.visitedPlaces,
-                                builder: (context, visitedSites, _) {
-                                  return Wrap(
-                                    spacing: 10,
-                                    runSpacing: 10,
-                                    children: appState.historicalSites
-                                        .where((site) =>
-                                            appState.hasVisited(site.name))
-                                        .map((place) {
-                                      return Chip(
-                                        backgroundColor: Colors.green[100],
-                                        avatar: Icon(
-                                          Icons.emoji_events,
-                                          color: Colors.green,
-                                          size: 18,
+                              return Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: appState.historicalSites
+                                    .where((site) =>
+                                        appState.hasVisited(site.name))
+                                    .map((place) {
+                                  return Chip(
+                                    backgroundColor: Colors.green[100],
+                                    avatar: Icon(
+                                      Icons.emoji_events,
+                                      color: Colors.green,
+                                      size: 18,
+                                    ),
+                                    label: Text(
+                                      place.name,
+                                      style: GoogleFonts.rakkas(
+                                        textStyle: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
+                                          fontSize: 14,
                                         ),
-                                        label: Text(
-                                          place.name,
-                                          style: GoogleFonts.rakkas(
-                                            textStyle: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ),
-                                        side: BorderSide(color: Colors.green),
-                                      );
-                                    }).toList(),
+                                      ),
+                                    ),
+                                    side: BorderSide(color: Colors.green),
                                   );
-                                },
+                                }).toList(),
                               );
                             },
-                          ),
+                          )
                         ],
                       ),
                     ),
