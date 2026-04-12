@@ -155,7 +155,18 @@ class ApplicationState extends ChangeNotifier {
           if (docSnapshot.exists) {
             final data = docSnapshot.data();
             if (data != null && data['visited'] != null) {
-              _visitedPlaces = Set<String>.from(data['visited'] as List);
+              // Load visited sites from Firestore
+              final rawVisited = Set<String>.from(data['visited'] as List);
+
+              // Build a set of valid site names from your historicalSites list
+              final siteNames = historicalSites.map((s) => s.name).toSet();
+
+              // Filter out invalid entries
+              final validVisited = rawVisited.where(siteNames.contains).toSet();
+
+              // Assign to app state
+              _visitedPlaces = validVisited;
+
               notifyListeners();
             }
           } else {
