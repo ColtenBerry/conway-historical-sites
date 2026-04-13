@@ -32,7 +32,6 @@ class _HomePageState extends State<HomePage> {
   late var sorted;
 
   void initState() {
-    getlocation();
     super.initState();
   }
 
@@ -44,6 +43,7 @@ class _HomePageState extends State<HomePage> {
     appState = Provider.of<ApplicationState>(context, listen: false);
     setState(() {
       activeFilters.clear();
+      getlocation();
     });
 
     _searchController = SearchController();
