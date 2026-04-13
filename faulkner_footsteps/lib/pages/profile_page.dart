@@ -5,6 +5,7 @@ import 'package:faulkner_footsteps/pages/login_page.dart';
 import 'package:faulkner_footsteps/widgets/achievement_item.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:faulkner_footsteps/app_state.dart';
@@ -357,9 +358,10 @@ class _ProfilePageState extends State<ProfilePage>
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 24),
 
-                // Password card
+                // Account Actions card
                 ExpansionTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
@@ -376,6 +378,59 @@ class _ProfilePageState extends State<ProfilePage>
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onPrimary)),
                     children: [
+                      if (appState.permissionStatus ==
+                              LocationPermission.denied ||
+                          appState.permissionStatus ==
+                              LocationPermission.deniedForever)
+                        Container(
+                          width: cardWidth / 1.05,
+                          child: Card(
+                            elevation: 2.0,
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            margin: EdgeInsets.zero,
+                            child: Padding(
+                              padding:
+                                  EdgeInsetsGeometry.symmetric(vertical: 16.0),
+                              child: Column(
+                                children: [
+                                  Text("Permissions are disabled"),
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        appState.ensureLocationPermission(),
+                                    child: Text(
+                                      appState.permissionStatus ==
+                                              LocationPermission.denied
+                                          ? "Allow Permissions"
+                                          : "Go to Settings",
+                                      style: GoogleFonts.rakkas(
+                                        textStyle: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      // Change Passowrd
                       Container(
                         width: cardWidth / 1.05,
                         child: Card(

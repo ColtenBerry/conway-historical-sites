@@ -562,6 +562,7 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<void> updateUserLocation() async {
+    print("call update user location");
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       _currentLocation = _fallback;
@@ -593,5 +594,30 @@ class ApplicationState extends ChangeNotifier {
 
     _currentLocation = LatLng(pos.latitude, pos.longitude);
     notifyListeners();
+  }
+
+  Future<void> ensureLocationPermission() async {
+    // print("calls ensure location permission");
+    // print("Permission: ${_permission}");
+    // final permission = await Geolocator.checkPermission();
+    // print("Result permission: ${permission}");
+    // _permission = permission;
+
+    if (_permission == LocationPermission.denied) {
+      final newPermission = await Geolocator.requestPermission();
+      if (newPermission == LocationPermission.denied) {
+        return; // user denied again
+      }
+      _permission = newPermission;
+      await updateUserLocation();
+      return;
+    }
+
+    if (_permission == LocationPermission.deniedForever) {
+      // print("Reached!!!");
+      await Geolocator.openAppSettings();
+      await updateUserLocation();
+      return;
+    }
   }
 }
