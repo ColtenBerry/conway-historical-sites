@@ -13,6 +13,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'firebase_options.dart';
@@ -43,6 +44,13 @@ class ApplicationState extends ChangeNotifier {
 
   List<ProgressAchievement> _progressAchievements = [];
   List<ProgressAchievement> get progressAchievements => _progressAchievements;
+
+  LocationPermission _permission = LocationPermission.denied;
+  LocationPermission get permissionStatus => _permission;
+
+  LatLng _fallback = const LatLng(35.0918, -92.4367);
+  LatLng _currentLocation = const LatLng(35.0918, -92.4367);
+  LatLng get currentLocation => _currentLocation;
 
   Future<void> init() async {
     print(" 🔵 Initializing ApplicationState at ${DateTime.now()}");
@@ -551,5 +559,39 @@ class ApplicationState extends ChangeNotifier {
       i++;
     }
     return sites;
+  }
+
+  Future<void> updateUserLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _currentLocation = _fallback;
+      notifyListeners();
+      return;
+    }
+
+    _permission = await Geolocator.checkPermission();
+    if (_permission == LocationPermission.denied) {
+      _permission = await Geolocator.requestPermission();
+      if (_permission == LocationPermission.denied) {
+        _currentLocation = _fallback;
+        notifyListeners();
+        return;
+      }
+    }
+
+    if (_permission == LocationPermission.deniedForever) {
+      _currentLocation = _fallback;
+      notifyListeners();
+      return;
+    }
+
+    final pos = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
+    );
+
+    _currentLocation = LatLng(pos.latitude, pos.longitude);
+    notifyListeners();
   }
 }
