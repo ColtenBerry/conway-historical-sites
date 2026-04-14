@@ -565,6 +565,7 @@ class ApplicationState extends ChangeNotifier {
     print("call update user location");
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      print("Service not enabled!");
       _currentLocation = _fallback;
       notifyListeners();
       return;
@@ -572,8 +573,10 @@ class ApplicationState extends ChangeNotifier {
 
     _permission = await Geolocator.checkPermission();
     if (_permission == LocationPermission.denied) {
+      print("Permissions are denied");
       _permission = await Geolocator.requestPermission();
       if (_permission == LocationPermission.denied) {
+        print("Permissions are still denied");
         _currentLocation = _fallback;
         notifyListeners();
         return;
@@ -581,11 +584,12 @@ class ApplicationState extends ChangeNotifier {
     }
 
     if (_permission == LocationPermission.deniedForever) {
+      print("permissions are denied forever");
       _currentLocation = _fallback;
       notifyListeners();
       return;
     }
-
+    print("permissions allow getting of current position");
     final pos = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
@@ -609,14 +613,14 @@ class ApplicationState extends ChangeNotifier {
         return; // user denied again
       }
       _permission = newPermission;
-      await updateUserLocation();
+      // await updateUserLocation();
       return;
     }
 
     if (_permission == LocationPermission.deniedForever) {
       // print("Reached!!!");
       await Geolocator.openAppSettings();
-      await updateUserLocation();
+      // await updateUserLocation();
       return;
     }
   }

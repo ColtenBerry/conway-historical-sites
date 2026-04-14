@@ -381,9 +381,9 @@ class _ProfilePageState extends State<ProfilePage>
                       const SizedBox(height: 24),
 
                       if (appState.permissionStatus ==
-                              LocationPermission.denied ||
+                              LocationPermission.deniedForever ||
                           appState.permissionStatus ==
-                              LocationPermission.deniedForever)
+                              LocationPermission.denied) ...[
                         Container(
                           width: cardWidth / 1.05,
                           child: Card(
@@ -401,16 +401,42 @@ class _ProfilePageState extends State<ProfilePage>
                               child: Column(
                                 children: [
                                   Text("Permissions are disabled"),
+                                  if (appState.permissionStatus ==
+                                      LocationPermission.deniedForever) ...[
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        onPressed: () =>
+                                            appState.ensureLocationPermission(),
+                                        child: Text(
+                                          "Go to Settings",
+                                          style: GoogleFonts.rakkas(
+                                            textStyle: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 16),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24)
+                                  ],
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
                                       onPressed: () =>
-                                          appState.ensureLocationPermission(),
+                                          appState.updateUserLocation(),
                                       child: Text(
-                                        appState.permissionStatus ==
-                                                LocationPermission.denied
-                                            ? "Allow Permissions"
-                                            : "Go to Settings",
+                                        "Request Permissions",
                                         style: GoogleFonts.rakkas(
                                           textStyle: TextStyle(
                                             color: Theme.of(context)
@@ -434,7 +460,8 @@ class _ProfilePageState extends State<ProfilePage>
                             ),
                           ),
                         ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
+                      ],
 
                       // Change Passowrd
                       Container(
