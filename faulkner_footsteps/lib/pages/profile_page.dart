@@ -395,34 +395,36 @@ class _ProfilePageState extends State<ProfilePage>
                             ),
                             margin: EdgeInsets.zero,
                             child: Padding(
-                              padding:
-                                  EdgeInsetsGeometry.symmetric(vertical: 16.0),
+                              padding: EdgeInsetsGeometry.all(16.0),
                               child: Column(
                                 children: [
                                   Text("Permissions are disabled"),
-                                  ElevatedButton(
-                                    onPressed: () =>
-                                        appState.ensureLocationPermission(),
-                                    child: Text(
-                                      appState.permissionStatus ==
-                                              LocationPermission.denied
-                                          ? "Allow Permissions"
-                                          : "Go to Settings",
-                                      style: GoogleFonts.rakkas(
-                                        textStyle: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          fontSize: 16,
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () =>
+                                          appState.ensureLocationPermission(),
+                                      child: Text(
+                                        appState.permissionStatus ==
+                                                LocationPermission.denied
+                                            ? "Allow Permissions"
+                                            : "Go to Settings",
+                                        style: GoogleFonts.rakkas(
+                                          textStyle: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            fontSize: 16,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 16),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                      ),
                                     ),
                                   )
                                 ],
