@@ -378,6 +378,8 @@ class _ProfilePageState extends State<ProfilePage>
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onPrimary)),
                     children: [
+                      const SizedBox(height: 24),
+
                       if (appState.permissionStatus ==
                               LocationPermission.denied ||
                           appState.permissionStatus ==
@@ -432,6 +434,8 @@ class _ProfilePageState extends State<ProfilePage>
                             ),
                           ),
                         ),
+                      const SizedBox(height: 24),
+
                       // Change Passowrd
                       Container(
                         width: cardWidth / 1.05,
