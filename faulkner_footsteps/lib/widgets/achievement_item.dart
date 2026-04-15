@@ -132,44 +132,54 @@ class AchievementItem extends StatelessWidget {
                     // Display sites with checkmarks for visited ones
                     Consumer<ApplicationState>(
                       builder: (context, appState, _) {
-                        return Column(
-                          children: achievement.requiredSites.map((site) {
-                            bool visited = appState.hasVisited(site);
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    visited
-                                        ? Icons.check_circle
-                                        : Icons.circle_outlined,
-                                    color: visited
-                                        ? Colors.green
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      site,
-                                      style: GoogleFonts.rakkas(
-                                        textStyle: TextStyle(
+                        return ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.of(context).size.height * 0.2,
+                          ),
+                          child: Scrollbar(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: achievement.requiredSites.map((site) {
+                                  bool visited = appState.hasVisited(site);
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          visited
+                                              ? Icons.check_circle
+                                              : Icons.circle_outlined,
                                           color: visited
-                                              ? Colors.green[800]
+                                              ? Colors.green
                                               : Theme.of(context)
                                                   .colorScheme
-                                                  .secondary,
-                                          fontSize: 14,
+                                                  .onPrimary,
+                                          size: 20,
                                         ),
-                                      ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            site,
+                                            style: GoogleFonts.rakkas(
+                                              textStyle: TextStyle(
+                                                color: visited
+                                                    ? Colors.green[800]
+                                                    : Theme.of(context)
+                                                        .colorScheme
+                                                        .secondary,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
+                                  );
+                                }).toList(),
                               ),
-                            );
-                          }).toList(),
+                            ),
+                          ),
                         );
                       },
                     ),
