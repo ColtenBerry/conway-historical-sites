@@ -1,10 +1,11 @@
 import 'package:faulkner_footsteps/app_router.dart';
- import 'package:faulkner_footsteps/objects/theme_data.dart';
+import 'package:faulkner_footsteps/objects/theme_data.dart';
 import 'package:faulkner_footsteps/pages/admin_page.dart';
 import 'package:faulkner_footsteps/pages/login_page.dart';
 import 'package:faulkner_footsteps/widgets/achievement_item.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:faulkner_footsteps/app_state.dart';
@@ -305,9 +306,10 @@ class _ProfilePageState extends State<ProfilePage>
                                           .colorScheme
                                           .onPrimary)),
                           const SizedBox(height: 16),
-                          Consumer<ApplicationState>(
-                            builder: (context, appState, _) {
-                              if (appState.visitedPlaces.isEmpty) {
+                          Selector<ApplicationState, Set<String>>(
+                            selector: (_, appState) => appState.visitedPlaces,
+                            builder: (context, visitedSites, _) {
+                              if (visitedSites.isEmpty) {
                                 return Text(
                                   'You haven\'t visited any historical sites yet.',
                                   style: Theme.of(context)
@@ -320,52 +322,46 @@ class _ProfilePageState extends State<ProfilePage>
                                       ),
                                 );
                               }
-
-                              return Selector<ApplicationState, Set<String>>(
-                                selector: (_, appState) =>
-                                    appState.visitedPlaces,
-                                builder: (context, visitedSites, _) {
-                                  return Wrap(
-                                    spacing: 10,
-                                    runSpacing: 10,
-                                    children: appState.historicalSites
-                                        .where((site) =>
-                                            appState.hasVisited(site.name))
-                                        .map((place) {
-                                      return Chip(
-                                        backgroundColor: Colors.green[100],
-                                        avatar: Icon(
-                                          Icons.emoji_events,
-                                          color: Colors.green,
-                                          size: 18,
+                              return Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: appState.historicalSites
+                                    .where((site) =>
+                                        appState.hasVisited(site.name))
+                                    .map((place) {
+                                  return Chip(
+                                    backgroundColor: Colors.green[100],
+                                    avatar: Icon(
+                                      Icons.emoji_events,
+                                      color: Colors.green,
+                                      size: 18,
+                                    ),
+                                    label: Text(
+                                      place.name,
+                                      style: GoogleFonts.rakkas(
+                                        textStyle: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
+                                          fontSize: 14,
                                         ),
-                                        label: Text(
-                                          place.name,
-                                          style: GoogleFonts.rakkas(
-                                            textStyle: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ),
-                                        side: BorderSide(color: Colors.green),
-                                      );
-                                    }).toList(),
+                                      ),
+                                    ),
+                                    side: BorderSide(color: Colors.green),
                                   );
-                                },
+                                }).toList(),
                               );
                             },
-                          ),
+                          )
                         ],
                       ),
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 24),
 
-                // Password card
+                // Account Actions card
                 ExpansionTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
@@ -382,6 +378,92 @@ class _ProfilePageState extends State<ProfilePage>
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onPrimary)),
                     children: [
+                      const SizedBox(height: 24),
+
+                      if (appState.permissionStatus ==
+                              LocationPermission.deniedForever ||
+                          appState.permissionStatus ==
+                              LocationPermission.denied) ...[
+                        Container(
+                          width: cardWidth / 1.05,
+                          child: Card(
+                            elevation: 2.0,
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            margin: EdgeInsets.zero,
+                            child: Padding(
+                              padding: EdgeInsetsGeometry.all(16.0),
+                              child: Column(
+                                children: [
+                                  Text("Permissions are disabled"),
+                                  if (appState.permissionStatus ==
+                                      LocationPermission.deniedForever) ...[
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        onPressed: () =>
+                                            appState.ensureLocationPermission(),
+                                        child: Text(
+                                          "Go to Settings",
+                                          style: GoogleFonts.rakkas(
+                                            textStyle: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 16),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24)
+                                  ],
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () =>
+                                          appState.updateUserLocation(),
+                                      child: Text(
+                                        "Request Permissions",
+                                        style: GoogleFonts.rakkas(
+                                          textStyle: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+
+                      // Change Passowrd
                       Container(
                         width: cardWidth / 1.05,
                         child: Card(

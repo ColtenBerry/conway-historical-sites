@@ -60,54 +60,6 @@ class _AdminListPageState extends State<AdminListPage> {
     // });
   }
 
-  Future<void> pickImages() async {
-    final int maxBytes = 1024 * 1024; // 1 MB
-    try {
-      final pickedImages = await ImagePicker().pickMultiImage();
-      if (pickedImages.isEmpty) return;
-
-      List<File> finalImages = [];
-
-      for (XFile image in pickedImages) {
-        final file = File(image.path);
-        final fileSize = await file.length();
-
-        if (fileSize > maxBytes) {
-          final compressed = await compressAndGetFile(file);
-          if (compressed != null) {
-            finalImages.add(compressed);
-          } else {
-            print("Compression failed for ${image.name}");
-          }
-        } else {
-          finalImages.add(file);
-        }
-      }
-
-      this.images = finalImages;
-      setState(() {});
-    } on PlatformException catch (e) {
-      print("Failed to pick images: $e");
-    }
-  }
-
-  Future<File?> compressAndGetFile(File file,
-      {int quality = 75, int maxWidth = 1280}) async {
-    final tempDir = await getTemporaryDirectory();
-    final targetPath =
-        '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-    XFile? result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      quality: quality,
-      minWidth: maxWidth,
-      minHeight: (maxWidth * 0.75).toInt(),
-      format: CompressFormat.jpeg,
-    );
-    return result != null ? File(result.path) : null;
-  }
-
   Future<List<String>> uploadImages(String folderName, List<String> fileNames,
       {List<File>? files}) async {
     print("begun uploading images");

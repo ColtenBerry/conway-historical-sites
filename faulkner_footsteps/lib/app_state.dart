@@ -13,6 +13,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'firebase_options.dart';
@@ -43,6 +44,13 @@ class ApplicationState extends ChangeNotifier {
 
   List<ProgressAchievement> _progressAchievements = [];
   List<ProgressAchievement> get progressAchievements => _progressAchievements;
+
+  LocationPermission _permission = LocationPermission.denied;
+  LocationPermission get permissionStatus => _permission;
+
+  LatLng _fallback = const LatLng(35.0918, -92.4367);
+  LatLng _currentLocation = const LatLng(35.0918, -92.4367);
+  LatLng get currentLocation => _currentLocation;
 
   Future<void> init() async {
     print(" 🔵 Initializing ApplicationState at ${DateTime.now()}");
@@ -322,7 +330,7 @@ class ApplicationState extends ChangeNotifier {
   //update/store rating in firebase
   void updateSiteRating(String siteName, double newRating) async {
     try {
-      print("reached here!");
+      // print("reached here!");
       final site = _historicalSites.firstWhere((s) => s.name == siteName);
       final userId = FirebaseAuth.instance.currentUser!.uid;
       double totalRating = 0;
@@ -548,5 +556,69 @@ class ApplicationState extends ChangeNotifier {
       i++;
     }
     return sites;
+  }
+
+  Future<void> updateUserLocation() async {
+    print("call update user location");
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      print("Service not enabled!");
+      _currentLocation = _fallback;
+      notifyListeners();
+      return;
+    }
+
+    _permission = await Geolocator.checkPermission();
+    if (_permission == LocationPermission.denied) {
+      print("Permissions are denied");
+      _permission = await Geolocator.requestPermission();
+      if (_permission == LocationPermission.denied) {
+        print("Permissions are still denied");
+        _currentLocation = _fallback;
+        notifyListeners();
+        return;
+      }
+    }
+
+    if (_permission == LocationPermission.deniedForever) {
+      print("permissions are denied forever");
+      _currentLocation = _fallback;
+      notifyListeners();
+      return;
+    }
+    print("permissions allow getting of current position");
+    final pos = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
+    );
+
+    _currentLocation = LatLng(pos.latitude, pos.longitude);
+    notifyListeners();
+  }
+
+  Future<void> ensureLocationPermission() async {
+    // print("calls ensure location permission");
+    // print("Permission: ${_permission}");
+    // final permission = await Geolocator.checkPermission();
+    // print("Result permission: ${permission}");
+    // _permission = permission;
+
+    if (_permission == LocationPermission.denied) {
+      final newPermission = await Geolocator.requestPermission();
+      if (newPermission == LocationPermission.denied) {
+        return; // user denied again
+      }
+      _permission = newPermission;
+      // await updateUserLocation();
+      return;
+    }
+
+    if (_permission == LocationPermission.deniedForever) {
+      // print("Reached!!!");
+      await Geolocator.openAppSettings();
+      // await updateUserLocation();
+      return;
+    }
   }
 }

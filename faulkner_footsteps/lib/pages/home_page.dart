@@ -6,7 +6,6 @@ import 'package:faulkner_footsteps/pages/map_display.dart';
 import 'package:faulkner_footsteps/widgets/profile_button.dart';
 import 'package:faulkner_footsteps/widgets/search_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -21,45 +20,9 @@ class _HomePageState extends State<HomePage> {
   Set<SiteFilter> activeFilters = {};
 
   late ApplicationState appState;
-  static LatLng? _currentPosition;
 
   void getlocation() async {
-    bool serviceEnabled;
-    double lat = 35.0918;
-    double long = -92.4367;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return setState(() {
-      _currentPosition = LatLng(lat, long);
-    });
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-       return setState(() {
-      _currentPosition = LatLng(lat, long);
-    });
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return setState(() {
-      _currentPosition = LatLng(lat, long);
-    });
-    }
-    final LocationSettings locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-    );
-    if (permission == LocationPermission.whileInUse || permission == LocationPermission.always){
-       Position position =
-        await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-     lat = position.latitude;
-     long = position.longitude;
-    }
-    setState(() {
-      _currentPosition = LatLng(lat, long);
-    });
+    appState.updateUserLocation();
   }
 
   late SearchController _searchController;
@@ -69,7 +32,6 @@ class _HomePageState extends State<HomePage> {
   late var sorted;
 
   void initState() {
-    getlocation();
     super.initState();
   }
 
@@ -81,6 +43,7 @@ class _HomePageState extends State<HomePage> {
     appState = Provider.of<ApplicationState>(context, listen: false);
     setState(() {
       activeFilters.clear();
+      getlocation();
     });
 
     _searchController = SearchController();
@@ -91,8 +54,8 @@ class _HomePageState extends State<HomePage> {
   Map<String, double> getDistances(Map<String, LatLng> locations) {
     Map<String, double> distances = {};
     for (int i = 0; i < locations.length; i++) {
-      distances[locations.keys.elementAt(i)] = distance.as(
-          LengthUnit.Meter, locations.values.elementAt(i), _currentPosition!);
+      distances[locations.keys.elementAt(i)] = distance.as(LengthUnit.Meter,
+          locations.values.elementAt(i), appState.currentLocation);
     }
     return distances;
   }
@@ -128,18 +91,16 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Optional: apply sorting
-    if (_currentPosition != null) {
-      final locations = appState.getLocations();
-      final distances = getDistances(locations);
-      filtered.sort((a, b) => distances[a.name]!.compareTo(distances[b.name]!));
-    }
+    final locations = appState.getLocations();
+    final distances = getDistances(locations);
+    filtered.sort((a, b) => distances[a.name]!.compareTo(distances[b.name]!));
 
     return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
-    while (_currentPosition == null) {
+    while (appState.currentLocation == null) {
       return Center(
         child: CircularProgressIndicator(),
       );
@@ -187,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                   sites: getFilteredSites(appState.historicalSites),
                   siteFilters: appState.siteFilters.toSet(),
                   activeFilters: activeFilters,
-                  currentPosition: _currentPosition!,
+                  currentPosition: appState.currentLocation,
                   onFilterChanged: (filter) {
                     setState(() {
                       !activeFilters.contains(filter)
@@ -203,9 +164,9 @@ class _HomePageState extends State<HomePage> {
                   },
                 )
               : MapDisplay2(
-                  currentPosition: _currentPosition!,
+                  currentPosition: appState.currentLocation,
                   sites: getFilteredSites(appState.historicalSites),
-                  centerPosition: _currentPosition!,
+                  centerPosition: appState.currentLocation,
                 ),
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
