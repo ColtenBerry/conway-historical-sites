@@ -13,6 +13,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager_firebase/flutter_cache_manager_firebase.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -57,7 +58,7 @@ class ApplicationState extends ChangeNotifier {
   Future<void> init() async {
     print(" 🔵 Initializing ApplicationState at ${DateTime.now()}");
     // Firebase is already initialized in main.dart, so no need to initialize again
-    
+
     // Load filters
     await loadFilters();
 
@@ -231,18 +232,21 @@ class ApplicationState extends ChangeNotifier {
 
   //TODO: Optimize image loading with caching mechanism. this should check to ensure images arent re-downloaded every time
   Future<Uint8List?> getImage(String s) async {
-    final imageRef = storageRef.child("$s");
-    Uint8List? data;
-    try {
-      const oneMegabyte = 1024 * 1024 * 5;
-      data = await imageRef.getData(oneMegabyte).timeout(Duration(seconds: 20));
-      // Data for "images/island.jpg" is returned, use this as needed.
-    } catch (e) {
-      // Handle any errors.
-      print(("ERROR!!! This occured when calling getImage(). Error: $e"));
-      print("Error is for $s");
-    } finally {}
-    return data;
+    // final imageRef = storageRef.child("$s");
+    // Uint8List? data;
+    // try {
+    //   const oneMegabyte = 1024 * 1024 * 5;
+    //   data = await imageRef.getData(oneMegabyte).timeout(Duration(seconds: 20));
+    //   // Data for "images/island.jpg" is returned, use this as needed.
+    // } catch (e) {
+    //   // Handle any errors.
+    //   print(("ERROR!!! This occured when calling getImage(). Error: $e"));
+    //   print("Error is for $s");
+    // } finally {}
+    // return data;
+
+    final file = await FirebaseCacheManager().getSingleFile(s);
+    return file.readAsBytes();
   }
 
   Future<List<Uint8List?>> getImageList(List<String> lst) async {

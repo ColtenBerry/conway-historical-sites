@@ -438,6 +438,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.1"
+  flutter_cache_manager_firebase:
+    dependency: "direct main"
+    description:
+      name: flutter_cache_manager_firebase
+      sha256: "0dc5c294562178768a609fb473ef0e5b100382f9bb3ab86941237aace3d0557f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
   flutter_image_compress:
     dependency: "direct main"
     description:
@@ -957,6 +965,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.5+1"
+  retry:
+    dependency: transitive
+    description:
+      name: retry
+      sha256: "822e118d5b3aafed083109c72d5f484c6dc66707885e07c0fbcb8b986bba7efc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
   rxdart:
     dependency: transitive
     description:

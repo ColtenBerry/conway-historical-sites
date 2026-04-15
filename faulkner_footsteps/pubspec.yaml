@@ -62,6 +62,7 @@ dependencies:
   path_provider: ^2.0.14
   photo_view: ^0.15.0
   cached_network_image: ^3.4.1
+  flutter_cache_manager_firebase: ^2.1.1
 
 
 dev_dependencies:
