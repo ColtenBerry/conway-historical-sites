@@ -193,27 +193,30 @@ class _AdminListPageState extends State<AdminListPage> {
             ),
           ),
         ),
-        ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16)),
-            onPressed: () async {
-              showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return EditFilterDialog(
-                        onAddFilter: app_state.addFilter,
-                        onSubmit: updateFilters,
-                        filters: app_state.siteFilters);
-                  });
-            },
-            child: Text(
-              "Edit Filters",
-              style: GoogleFonts.ultra(
-                  textStyle:
-                      const TextStyle(color: Color.fromARGB(255, 76, 32, 8))),
-            )),
+        Padding(
+          padding: EdgeInsetsGeometry.only(bottom: 16),
+          child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16)),
+              onPressed: () async {
+                showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return EditFilterDialog(
+                          onAddFilter: app_state.addFilter,
+                          onSubmit: updateFilters,
+                          filters: app_state.siteFilters);
+                    });
+              },
+              child: Text(
+                "Edit Filters",
+                style: GoogleFonts.ultra(
+                    textStyle:
+                        const TextStyle(color: Color.fromARGB(255, 76, 32, 8))),
+              )),
+        ),
         Expanded(
           child: Consumer<ApplicationState>(
             builder: (context, appState, chile) {
