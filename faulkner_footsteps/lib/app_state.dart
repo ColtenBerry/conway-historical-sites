@@ -20,8 +20,10 @@ import 'firebase_options.dart';
 import 'package:faulkner_footsteps/objects/progress_achievement.dart';
 
 class ApplicationState extends ChangeNotifier {
+  late Future<void> initComplete;
+
   ApplicationState() {
-    init();
+    initComplete = init();
   }
 
   bool _loggedIn = false;
@@ -54,13 +56,8 @@ class ApplicationState extends ChangeNotifier {
 
   Future<void> init() async {
     print(" 🔵 Initializing ApplicationState at ${DateTime.now()}");
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
-
-    FirebaseUIAuth.configureProviders([
-      EmailAuthProvider(),
-    ]);
-
+    // Firebase is already initialized in main.dart, so no need to initialize again
+    
     // Load filters
     await loadFilters();
 
