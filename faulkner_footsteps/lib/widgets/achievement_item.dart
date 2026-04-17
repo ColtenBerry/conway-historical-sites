@@ -137,6 +137,7 @@ class AchievementItem extends StatelessWidget {
                             maxHeight: MediaQuery.of(context).size.height * 0.2,
                           ),
                           child: Scrollbar(
+                            thumbVisibility: true,
                             child: SingleChildScrollView(
                               child: Column(
                                 children: achievement.requiredSites.map((site) {
