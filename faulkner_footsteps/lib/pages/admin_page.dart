@@ -173,6 +173,7 @@ class _AdminListPageState extends State<AdminListPage> {
             ),
             onPressed: () {
               showDialog(
+                  barrierDismissible: false,
                   context: context,
                   builder: (context) {
                     return EditSiteDialog(
@@ -237,6 +238,7 @@ class _AdminListPageState extends State<AdminListPage> {
                         },
                         onEditSite: () {
                           showDialog(
+                              barrierDismissible: false,
                               context: context,
                               builder: (context) {
                                 return EditSiteDialog(

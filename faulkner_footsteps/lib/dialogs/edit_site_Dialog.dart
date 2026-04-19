@@ -501,6 +501,7 @@ class _EditSiteDialogState extends State<EditSiteDialog> {
                             icon: const Icon(Icons.edit),
                             onPressed: () async {
                               final updated = await showDialog<InfoText>(
+                                barrierDismissible: false,
                                 context: context,
                                 builder: (context) => BlurbDialog(
                                   infoText: blurb,
@@ -532,6 +533,7 @@ class _EditSiteDialogState extends State<EditSiteDialog> {
                 ElevatedButton(
                   onPressed: () async {
                     final newBlurb = await showDialog<InfoText>(
+                      barrierDismissible: false,
                       context: context,
                       builder: (context) => BlurbDialog(),
                     );
