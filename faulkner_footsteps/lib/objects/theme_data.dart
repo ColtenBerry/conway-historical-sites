@@ -70,6 +70,12 @@ final ThemeData faulknerFootstepsTheme = ThemeData(
         labelMedium: GoogleFonts.ultra(
           fontSize: 12,
         )),
+    scrollbarTheme: ScrollbarThemeData(
+      thumbColor: WidgetStateProperty.all<Color>(
+          Color.fromARGB(255, 76, 32, 8).withValues(alpha: 0.7)),
+      trackColor: WidgetStateProperty.all<Color>(
+          Color.fromARGB(255, 76, 32, 8).withValues(alpha: 0.3)),
+    ),
     iconTheme: IconThemeData());
 
 ///
