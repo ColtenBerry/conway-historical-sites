@@ -27,8 +27,10 @@ class ApplicationState extends ChangeNotifier {
     initComplete = init();
   }
 
-  bool _loggedIn = false;
-  bool get loggedIn => _loggedIn;
+  User? _firebaseUser;
+
+  bool get loggedIn => _firebaseUser != null;
+  User? get FirebaseUser => _firebaseUser;
 
   StreamSubscription<DocumentSnapshot>? _achievementsSubscription;
   StreamSubscription<QuerySnapshot>? _userAchievementsSubscription;
@@ -105,9 +107,8 @@ class ApplicationState extends ChangeNotifier {
     // Listen to auth state changes to update the app state accordingly
     FirebaseAuth.instance.authStateChanges().listen((user) async {
       print("🔵 Auth state changed at ${DateTime.now()}  user: ${user?.uid}");
+      _firebaseUser = user;
       if (user != null) {
-        _loggedIn = true;
-
         // Check if user is admin and update status
         await checkAdminStatus(user);
 
@@ -181,7 +182,6 @@ class ApplicationState extends ChangeNotifier {
           }
         });
       } else {
-        _loggedIn = false;
         _visitedPlaces = {};
         _progressAchievements = [];
         _achievementsSubscription?.cancel();
@@ -300,7 +300,7 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<double> getUserRating(String siteName) async {
-    if (!_loggedIn) return 0.0;
+    if (!loggedIn) return 0.0;
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return 0.0;
 
@@ -409,7 +409,7 @@ class ApplicationState extends ChangeNotifier {
 
   // Achievement Management Methods
   Future<void> loadAchievements() async {
-    if (!_loggedIn) return;
+    if (!loggedIn) return;
 
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return;
@@ -461,7 +461,7 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<void> addFilter(String name) async {
-    if (!_loggedIn) return;
+    if (!loggedIn) return;
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return;
 
@@ -485,7 +485,7 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<void> saveFilterOrder() async {
-    if (!_loggedIn) return;
+    if (!loggedIn) return;
 
     try {
       // Normalize and save the new order
@@ -509,7 +509,7 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<void> removeFilter(String name) async {
-    if (!_loggedIn) return;
+    if (!loggedIn) return;
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return;
 
@@ -521,7 +521,7 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<void> saveAchievement(String place) async {
-    if (!_loggedIn) return;
+    if (!loggedIn) return;
 
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return;

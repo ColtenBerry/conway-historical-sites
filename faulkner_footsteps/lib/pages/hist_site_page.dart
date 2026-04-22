@@ -32,7 +32,7 @@ class HistSitePage extends StatefulWidget {
 class _HistSitePage extends State<HistSitePage> {
   late double personalRating;
   final Distance _distance = new Distance();
-  late ApplicationState app_state;
+  late ApplicationState appState;
   String errorMessage = "";
 
   @override
@@ -43,12 +43,12 @@ class _HistSitePage extends State<HistSitePage> {
 
   void didChangeDependencies() {
     super.didChangeDependencies();
-    app_state = Provider.of<ApplicationState>(context, listen: false);
+    appState = Provider.of<ApplicationState>(context, listen: false);
     getUserRating();
   }
 
   void getUserRating() async {
-    personalRating = await app_state.getUserRating(widget.histSite.name);
+    personalRating = await appState.getUserRating(widget.histSite.name);
     setState(() {});
   }
 
@@ -153,11 +153,10 @@ class _HistSitePage extends State<HistSitePage> {
                                             body: MapDisplay2(
                                               currentPosition:
                                                   widget.currentPosition,
-                                              sites: app_state.historicalSites,
+                                              sites: appState.historicalSites,
                                               centerPosition: LatLng(
                                                   widget.histSite.lat,
                                                   widget.histSite.lng),
-                                                  
                                             ),
                                           )),
                                 );
@@ -331,16 +330,14 @@ class _HistSitePage extends State<HistSitePage> {
                   starCount: 5,
                   onRatingChanged: (rating) {
                     try {
-                      final user = FirebaseAuth.instance.currentUser;
-
-                      if (user == null) {
+                      if (!appState.loggedIn) {
                         updateErrorMessage(
                             "You must be logged in to rate sites!");
 
                         return;
                       }
 
-                      if (!app_state.visitedPlaces
+                      if (!appState.visitedPlaces
                           .contains(widget.histSite.name)) {
                         updateErrorMessage(
                             "You must visit ${widget.histSite.name} to rate it!");
@@ -362,7 +359,7 @@ class _HistSitePage extends State<HistSitePage> {
                         personalRating = rating;
                       });
 
-                      app_state.updateSiteRating(widget.histSite.name, rating);
+                      appState.updateSiteRating(widget.histSite.name, rating);
                     } catch (e, st) {
                       print("Error in onRatingChanged: $e\n$st");
                     }

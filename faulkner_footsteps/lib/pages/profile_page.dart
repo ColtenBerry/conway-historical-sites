@@ -60,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage>
 
     try {
       // Get current user and credentials
-      final user = FirebaseAuth.instance.currentUser;
+      final user = appState.FirebaseUser;
       final email = user?.email;
 
       if (user != null && email != null) {
@@ -101,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage>
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = appState.FirebaseUser;
     // Get screen width to set explicit width for all cards
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth =

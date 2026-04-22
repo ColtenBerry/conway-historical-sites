@@ -1,11 +1,13 @@
 import 'dart:ui';
 
+import 'package:faulkner_footsteps/app_state.dart';
 import 'package:faulkner_footsteps/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class _NoScrollBehavior extends ScrollBehavior {
   @override
@@ -118,27 +120,13 @@ class LoginPage extends StatelessWidget {
       ),
       resizeToAvoidBottomInset: false, // Prevent resizing when keyboard appears
       backgroundColor: customTheme.colorScheme.surface,
-      body: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          final user = snapshot.data;
-
-          if (user == null) {
+      body: Consumer<ApplicationState>(
+        builder: (context, appState, _) {
+          if (!appState.loggedIn) {
             return buildSignInScreen(context, customTheme);
+          } else {
+            return HomePage();
           }
-
-          // User is signed in — navigate to HomePage
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-                (route) => false,
-              );
-            }
-          });
-
-          return SizedBox.shrink();
         },
       ),
     );
