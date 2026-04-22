@@ -3,6 +3,7 @@ import 'package:faulkner_footsteps/dialogs/pin_Dialog.dart';
 import 'package:faulkner_footsteps/pages/hist_site_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:faulkner_footsteps/objects/hist_site.dart';
@@ -38,11 +39,12 @@ class _MapDisplay2State extends State<MapDisplay2> {
     });
   }
 
-  void _initializeMap() {
+  void _initializeMap() async {
+    await Future.delayed(const Duration(milliseconds: 20));
     final target = widget.centerPosition ?? widget.currentPosition;
-    final appState = Provider.of<ApplicationState>(context, listen: false);
-    _mapController.move(target, 14.0);
-    if (!_dialogShown && appState.loggedIn) {
+    final zoom = widget.centerPosition != null ? 20.0 : 14.0;
+    _mapController.move(target, zoom);
+    if (!_dialogShown) {
       locationDialog(context);
       _dialogShown = true;
     }
@@ -135,6 +137,7 @@ class _MapDisplay2State extends State<MapDisplay2> {
     if (nearBySites.isEmpty) {
       return;
     }
+    if (!appState.loggedIn) return;
 
     // Sort by distance
     nearBySites.sort((a, b) => a.value.compareTo(b.value));
@@ -144,6 +147,10 @@ class _MapDisplay2State extends State<MapDisplay2> {
         nearBySites.where((entry) => !appState.hasVisited(entry.key)).toList();
 
     // If no new sites, return
+    if (widget.currentPosition == LatLng(35.0918, -92.4367)) {
+      return;
+    }
+    ;
     if (newSites.isEmpty) {
       return;
     }
@@ -355,7 +362,7 @@ class _MapDisplay2State extends State<MapDisplay2> {
           initialCenter: widget.centerPosition == null
               ? widget.currentPosition
               : widget.centerPosition!,
-          initialZoom: 14.0,
+          initialZoom: widget.centerPosition != null ? 17.0 : 12.0,
         ),
         children: [
           TileLayer(

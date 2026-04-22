@@ -42,9 +42,12 @@ void main() async {
   // }
   // // ···
 
+  final appState = ApplicationState();
+  await appState.initComplete;
+
   runApp(
     ChangeNotifierProvider<ApplicationState>(
-      create: (_) => ApplicationState(),
+      create: (_) => appState,
       child: MyApp(),
     ),
   );

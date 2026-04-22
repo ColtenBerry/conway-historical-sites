@@ -13,14 +13,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager_firebase/flutter_cache_manager_firebase.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'firebase_options.dart';
 import 'package:faulkner_footsteps/objects/progress_achievement.dart';
 
 class ApplicationState extends ChangeNotifier {
+  late Future<void> initComplete;
+
   ApplicationState() {
-    init();
+    initComplete = init();
   }
 
   bool _loggedIn = false;
@@ -44,14 +48,16 @@ class ApplicationState extends ChangeNotifier {
   List<ProgressAchievement> _progressAchievements = [];
   List<ProgressAchievement> get progressAchievements => _progressAchievements;
 
+  LocationPermission _permission = LocationPermission.denied;
+  LocationPermission get permissionStatus => _permission;
+
+  LatLng _fallback = const LatLng(35.0918, -92.4367);
+  LatLng _currentLocation = const LatLng(35.0918, -92.4367);
+  LatLng get currentLocation => _currentLocation;
+
   Future<void> init() async {
     print(" 🔵 Initializing ApplicationState at ${DateTime.now()}");
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
-
-    FirebaseUIAuth.configureProviders([
-      EmailAuthProvider(),
-    ]);
+    // Firebase is already initialized in main.dart, so no need to initialize again
 
     // Load filters
     await loadFilters();
@@ -97,7 +103,7 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
 
     // Listen to auth state changes to update the app state accordingly
-    FirebaseAuth.instance.userChanges().listen((user) async {
+    FirebaseAuth.instance.authStateChanges().listen((user) async {
       print("🔵 Auth state changed at ${DateTime.now()}  user: ${user?.uid}");
       if (user != null) {
         _loggedIn = true;
@@ -111,16 +117,35 @@ class ApplicationState extends ChangeNotifier {
             .snapshots()
             .listen((snapshot) {
           _progressAchievements = [];
+          final siteNames = _historicalSites.map((s) => s.name).toSet();
           for (final document in snapshot.docs) {
             final title = document.get('title') as String;
             final description = document.get('description') as String;
             final requiredSites =
                 List<String>.from(document.get('requiredSites') as List);
 
+            // validate sites. check if site is in historical sites list.
+            for (final site in requiredSites) {
+              if (!siteNames.contains(site)) {
+                // Debug: log invalid sites
+                print("🚨 INVALID SITE IN ACHIEVEMENT!");
+                print("   Achievement: $title");
+                print("   Invalid site: $site");
+
+                // TODO: remove site here
+                // I would add it in right now, but I am not sure if it is good practice to have just any user in app state
+                // edit the firestore. Let me think about that
+              }
+            }
+
+            // Filter out invalid sites
+            final validSites = requiredSites.where(siteNames.contains).toList();
+            validSites.toSet();
+            validSites.toList();
             _progressAchievements.add(ProgressAchievement(
               title: title,
               description: description,
-              requiredSites: requiredSites,
+              requiredSites: validSites,
             ));
           }
           notifyListeners();
@@ -136,7 +161,18 @@ class ApplicationState extends ChangeNotifier {
           if (docSnapshot.exists) {
             final data = docSnapshot.data();
             if (data != null && data['visited'] != null) {
-              _visitedPlaces = Set<String>.from(data['visited'] as List);
+              // Load visited sites from Firestore
+              final rawVisited = Set<String>.from(data['visited'] as List);
+
+              // Build a set of valid site names from your historicalSites list
+              final siteNames = historicalSites.map((s) => s.name).toSet();
+
+              // Filter out invalid entries
+              final validVisited = rawVisited.where(siteNames.contains).toSet();
+
+              // Assign to app state
+              _visitedPlaces = validVisited;
+
               notifyListeners();
             }
           } else {
@@ -154,6 +190,10 @@ class ApplicationState extends ChangeNotifier {
       }
     });
     notifyListeners();
+
+    FirebaseAuth.instance.userChanges().listen((user) async {
+      print("User State Changed!");
+    });
   }
 
   Future<List<String>> convertPathsToUrls(List<String> paths) async {
@@ -192,18 +232,21 @@ class ApplicationState extends ChangeNotifier {
 
   //TODO: Optimize image loading with caching mechanism. this should check to ensure images arent re-downloaded every time
   Future<Uint8List?> getImage(String s) async {
-    final imageRef = storageRef.child("$s");
-    Uint8List? data;
-    try {
-      const oneMegabyte = 1024 * 1024 * 5;
-      data = await imageRef.getData(oneMegabyte).timeout(Duration(seconds: 20));
-      // Data for "images/island.jpg" is returned, use this as needed.
-    } catch (e) {
-      // Handle any errors.
-      print(("ERROR!!! This occured when calling getImage(). Error: $e"));
-      print("Error is for $s");
-    } finally {}
-    return data;
+    // final imageRef = storageRef.child("$s");
+    // Uint8List? data;
+    // try {
+    //   const oneMegabyte = 1024 * 1024 * 5;
+    //   data = await imageRef.getData(oneMegabyte).timeout(Duration(seconds: 20));
+    //   // Data for "images/island.jpg" is returned, use this as needed.
+    // } catch (e) {
+    //   // Handle any errors.
+    //   print(("ERROR!!! This occured when calling getImage(). Error: $e"));
+    //   print("Error is for $s");
+    // } finally {}
+    // return data;
+
+    final file = await FirebaseCacheManager().getSingleFile(s);
+    return file.readAsBytes();
   }
 
   Future<List<Uint8List?>> getImageList(List<String> lst) async {
@@ -288,7 +331,7 @@ class ApplicationState extends ChangeNotifier {
   //update/store rating in firebase
   void updateSiteRating(String siteName, double newRating) async {
     try {
-      print("reached here!");
+      // print("reached here!");
       final site = _historicalSites.firstWhere((s) => s.name == siteName);
       final userId = FirebaseAuth.instance.currentUser!.uid;
       double totalRating = 0;
@@ -415,39 +458,6 @@ class ApplicationState extends ChangeNotifier {
     } catch (e) {
       print("Error loading filters: $e");
     }
-
-    // Load progress achievements after filters are loaded
-    await loadProgressAchievements();
-  }
-
-  Future<void> loadProgressAchievements() async {
-    if (!_loggedIn) return;
-
-    try {
-      _progressAchievements.clear();
-
-      final snapshot = await FirebaseFirestore.instance
-          .collection('progress_achievements')
-          .get();
-
-      for (final document in snapshot.docs) {
-        final title = document.get('title') as String;
-        final description = document.get('description') as String;
-        final requiredSites =
-            List<String>.from(document.get('requiredSites') as List);
-
-        _progressAchievements.add(ProgressAchievement(
-          title: title,
-          description: description,
-          requiredSites: requiredSites,
-        ));
-      }
-
-      notifyListeners();
-      print('Loaded ${_progressAchievements.length} progress achievements');
-    } catch (e) {
-      print('Error loading progress achievements: $e');
-    }
   }
 
   Future<void> addFilter(String name) async {
@@ -547,5 +557,69 @@ class ApplicationState extends ChangeNotifier {
       i++;
     }
     return sites;
+  }
+
+  Future<void> updateUserLocation() async {
+    print("call update user location");
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      print("Service not enabled!");
+      _currentLocation = _fallback;
+      notifyListeners();
+      return;
+    }
+
+    _permission = await Geolocator.checkPermission();
+    if (_permission == LocationPermission.denied) {
+      print("Permissions are denied");
+      _permission = await Geolocator.requestPermission();
+      if (_permission == LocationPermission.denied) {
+        print("Permissions are still denied");
+        _currentLocation = _fallback;
+        notifyListeners();
+        return;
+      }
+    }
+
+    if (_permission == LocationPermission.deniedForever) {
+      print("permissions are denied forever");
+      _currentLocation = _fallback;
+      notifyListeners();
+      return;
+    }
+    print("permissions allow getting of current position");
+    final pos = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
+    );
+
+    _currentLocation = LatLng(pos.latitude, pos.longitude);
+    notifyListeners();
+  }
+
+  Future<void> ensureLocationPermission() async {
+    // print("calls ensure location permission");
+    // print("Permission: ${_permission}");
+    // final permission = await Geolocator.checkPermission();
+    // print("Result permission: ${permission}");
+    // _permission = permission;
+
+    if (_permission == LocationPermission.denied) {
+      final newPermission = await Geolocator.requestPermission();
+      if (newPermission == LocationPermission.denied) {
+        return; // user denied again
+      }
+      _permission = newPermission;
+      // await updateUserLocation();
+      return;
+    }
+
+    if (_permission == LocationPermission.deniedForever) {
+      // print("Reached!!!");
+      await Geolocator.openAppSettings();
+      // await updateUserLocation();
+      return;
+    }
   }
 }
