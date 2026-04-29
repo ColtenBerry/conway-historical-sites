@@ -43,6 +43,7 @@ class AppRouter {
             filters: [])
       };
     }
+    print("This is the defualt page  $settings.name");
     switch (settings.name) {
       case startPage:
         return MaterialPageRoute(builder: (_) => const StartPage());
@@ -58,7 +59,7 @@ class AppRouter {
       case profilePage:
         return MaterialPageRoute(builder: (_) => const ProfilePage());
       default:
-        return _errorRoute();
+        return MaterialPageRoute(builder: (_) => const StartPage());
     }
   }
 
