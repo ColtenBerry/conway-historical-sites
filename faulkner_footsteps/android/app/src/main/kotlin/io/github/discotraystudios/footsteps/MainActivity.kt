@@ -1,4 +1,4 @@
-package com.art.faulkner_footsteps
+package io.github.discotraystudios.footsteps
 
 import io.flutter.embedding.android.FlutterActivity
 

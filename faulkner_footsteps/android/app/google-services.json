@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:188926477134:android:e6982bf3d743600a41541f",
+        "mobilesdk_app_id": "1:188926477134:android:23562f9f41a2b84741541f",
         "android_client_info": {
-          "package_name": "com.art.faulkner_footsteps"
+          "package_name": "io.github.discotraystudios.footsteps"
         }
       },
       "oauth_client": [],
