@@ -251,7 +251,6 @@ class ApplicationState extends ChangeNotifier {
 
   Future<List<Uint8List?>> getImageList(List<String> lst) async {
     List<Uint8List?> rList = await Future.wait(lst.map(getImage));
-
     return rList;
   }
 

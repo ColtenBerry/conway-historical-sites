@@ -42,7 +42,7 @@ class _MapDisplay2State extends State<MapDisplay2> {
   void _initializeMap() async {
     await Future.delayed(const Duration(milliseconds: 20));
     final target = widget.centerPosition ?? widget.currentPosition;
-    final zoom = widget.centerPosition != null ? 20.0 : 14.0;
+    final zoom = 18.00;
     _mapController.move(target, zoom);
     if (!_dialogShown) {
       locationDialog(context);
@@ -362,7 +362,7 @@ class _MapDisplay2State extends State<MapDisplay2> {
           initialCenter: widget.centerPosition == null
               ? widget.currentPosition
               : widget.centerPosition!,
-          initialZoom: widget.centerPosition != null ? 17.0 : 12.0,
+          initialZoom: 18.00,
         ),
         children: [
           TileLayer(
